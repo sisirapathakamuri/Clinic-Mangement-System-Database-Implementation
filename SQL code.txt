@@ -1,0 +1,336 @@
+drop database if exists s4hospitaldec8;
+GO
+if not exists(select * from sys.databases where name='s4hospitaldec8')
+create DATABASE s4hospitaldec8
+GO
+
+
+-- Down Script
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_bill_patient_id')
+    alter table bills drop constraint FK_bill_patient_id
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_bill_insurance_no')
+    alter table bills drop constraint FK_bill_insurance_no
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_bill_patient_id')
+    alter table bills drop constraint FK_bill_patient_id
+GO  
+drop table if exists bills
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_insurance_patient_id')
+    alter table insurance drop constraint FK_insurance_patient_id
+GO   
+drop table if exists insurance
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_report_patient_id')
+    alter table reports drop constraint FK_report_patient_id
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_report_doctor_id')
+    alter table reports drop constraint FK_report_doctor_id
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_report_lab_test_id')
+    alter table reports drop constraint FK_report_lab_test_id
+GO    
+drop table if exists reports
+GO
+drop table if exists medicines
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_lab_patient_id')
+    alter table lab_tests drop constraint FK_lab_patient_id
+GO    
+drop table if exists lab_tests
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_appointment_patient_id')
+    alter table appointments drop constraint FK_appointment_patient_id
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_appointment_doctor_id')
+    alter table appointments drop constraint FK_appointment_doctor_id
+GO    
+drop table if exists appointments
+GO
+drop table if exists doctors
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK_employees_department_id')
+    alter table employees drop constraint FK_employees_department_id
+GO
+drop table if exists employees
+GO
+drop table if exists departments
+GO
+if exists(select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+    where CONSTRAINT_NAME='FK__patient_info_patient_info_id')
+    alter table patient_info drop constraint FK__patient_info_patient_info_id
+GO
+drop table if exists patient_info
+GO
+drop table if exists patients
+GO
+
+
+-- Up Script
+
+
+CREATE TABLE [dbo].[patients](
+    [patient_id] [int] NOT NULL,
+    [patient_fname] [varchar](25) NOT NULL,
+    [patient_lname] [varchar] (25) NOT NULL,
+    [patient_gender] [varchar] (25) NOT NULL,
+    [patient_streetname] [varchar] (50) NOT NULL,
+    [patient_city] [varchar] (25) NOT NULL,
+    [patient_state] [varchar] (25) NOT NULL,
+    [patient_zip] [int]  NOT NULL,
+    [patient_email] [varchar] (25) NOT NULL,
+    [patient_phone] [varchar] (10) NOT NULL,
+    CONSTRAINT [PK_patients_patient_id] PRIMARY KEY ([patient_id]),
+    CONSTRAINT [U_patients_patient_email] UNIQUE ([patient_email])
+)
+GO
+CREATE TABLE [dbo].[patient_info](
+    [patient_info_id] [int] NOT NULL,
+    [patient_info_height] [float]  NOT NULL,
+    [patient_indo_dob] [date] NOT NULL,
+    [patient_info_weight] [float] NOT NULL,
+    [patient_info_bloodtype] [varchar] (25) NOT NULL,
+    [patient_info_bp] [varchar] (25) NOT NULL,
+    [patient_info_temp] [float] NOT NULL,
+    CONSTRAINT [PK_patient_info_patient_info_id] PRIMARY KEY ([patient_info_id]),
+    CONSTRAINT [FK__patient_info_patient_info_id] FOREIGN KEY ([patient_info_id]) references patients([patient_id])
+)
+GO
+ CREATE TABLE [dbo].[departments](
+    [department_id] [int] NOT NULL,
+    [department_name] [varchar](25)  NOT NULL,
+    CONSTRAINT [PK_departments_department_id] PRIMARY KEY ([department_id])
+)
+GO
+CREATE TABLE [dbo].[employees](
+    [employees_id] [int] NOT NULL,
+    [employees_fname] [varchar](25) NOT NULL,
+    [employees_lname] [varchar] (25) NOT NULL,
+    [employees_gender] [varchar] (25) NOT NULL,
+    [employees_dob] [date] NOT NULL,
+    [employees_country_origin] [varchar] (25) NOT NULL,
+    [employees_streetname] [varchar] (50) NOT NULL,
+    [employees_city] [varchar] (25) NOT NULL,
+    [employees_state] [varchar](25) NOT NULL,
+    [employees_zip] [int]  NOT NULL,
+    [employees_email] [varchar](25) NOT NULL,
+    [employees_phone] [varchar] (10) NOT NULL,
+    [employees_department_id] [int] NOT NULL,
+    CONSTRAINT [PK_employees_employee_id] PRIMARY KEY ([employees_id]),
+    CONSTRAINT [FK_employees_department_id] FOREIGN KEY ([employees_department_id]) REFERENCES departments([department_id])
+)
+GO
+CREATE TABLE [dbo].[doctors](
+    [doctor_id] [int] NOT NULL,
+    [doctor_fname] [varchar](25) NOT NULL,
+    [doctor_lname] [varchar] (25) NOT NULL,
+    [doctor_email] [varchar] (25) NOT NULL,
+    [doctor_specialization] [varchar] (25) NOT NULL,
+    CONSTRAINT [PK_doctors_doctor_id] PRIMARY KEY ([doctor_id])
+)
+GO
+CREATE TABLE [dbo].[appointments](
+    [appointment_id] [int] NOT NULL,
+    [appointment_patient_id] [int] NOT NULL,
+    [appointment_doctor_id] [int] NOT NULL,
+    [appointment_created_date] date NOT NULL,
+    [appointment_date] date NOT NULL,
+    [appointment_time] [varchar] (25) NOT NULL,
+    [appointment_desc] [varchar](50) NOT NULL,
+    CONSTRAINT [PK_appointment_id] PRIMARY KEY ([appointment_id]),
+    CONSTRAINT [FK_appointment_patient_id] FOREIGN KEY ([appointment_patient_id]) REFERENCES patients([patient_id]),
+    CONSTRAINT [FK_appointment_doctor_id] FOREIGN KEY ([appointment_doctor_id]) REFERENCES doctors([doctor_id])
+)
+GO
+CREATE TABLE [dbo].[lab_tests](
+    [lab_test_id] [int] NOT NULL,
+    [lab_test_type] [varchar](25) NOT NULL,
+    [lab_test_date] date NOT NULL,
+    [lab_test_price] [int] NOT NULL,
+    [lab_patient_id] [int] NOT NULL,
+    [lab_appointment_id] [int] NOT NULL,
+    CONSTRAINT [PK_lab_test_id] PRIMARY KEY ([lab_test_id]),
+    CONSTRAINT [FK_lab_patient_id] FOREIGN KEY ([lab_patient_id]) REFERENCES patient_info([patient_info_id]),
+    CONSTRAINT [FK_lab_appointment_id] FOREIGN KEY ([lab_appointment_id]) REFERENCES appointments([appointment_id])
+)
+GO
+CREATE TABLE [dbo].[medicines](
+    [medicine_id] [int] NOT NULL,
+    [medicine_name] varchar(25) NOT NULL,
+    [medicine_type] varchar(25) NOT NULL,
+    [medicine_cost] [float] NOT NULL,
+    [medicine_desc] varchar(50) NOT NULL,
+    CONSTRAINT [PK_medicine_id] PRIMARY KEY ([medicine_id])
+)
+GO
+CREATE TABLE [dbo].[reports](
+    [report_id] [int] identity NOT NULL,
+    [report_patient_id] [int] NOT NULL,
+    [report_doctor_id] [int] NOT NULL,
+    [report_lab_test_id] [int] NOT NULL,
+    [report_diagnosis] varchar(50) NOT NULL,
+    [report_prescribed_medicine_id] [int] NOT NULL,
+    CONSTRAINT [PK_report_id] PRIMARY KEY ([report_id]),
+    CONSTRAINT [FK_report_patient_id] FOREIGN KEY ([report_patient_id]) REFERENCES patient_info([patient_info_id]),
+    CONSTRAINT [FK_report_doctor_id] FOREIGN KEY ([report_doctor_id]) REFERENCES doctors([doctor_id]),
+    CONSTRAINT [FK_report_lab_test_id] FOREIGN KEY ([report_lab_test_id]) REFERENCES lab_tests([lab_test_id]),
+    CONSTRAINT [FK_report_prescribed_medicine_id] FOREIGN KEY ([report_prescribed_medicine_id]) REFERENCES medicines([medicine_id])
+)
+GO
+CREATE TABLE [dbo].[insurance](
+    [insurance_no] [int] NOT NULL,
+    [insurance_patient_id] [int] NOT NULL,
+    [insurance_type] [varchar](25) NOT NULL,
+    [insurance_publish_date] date NOT NULL,
+    [insurance_expiry_date] date NOT NULL,
+    CONSTRAINT [PK_insurance_no] PRIMARY KEY ([insurance_no]),
+    CONSTRAINT [FK_insurance_patient_id] FOREIGN KEY ([insurance_patient_id]) REFERENCES patient_info([patient_info_id])
+)
+GO
+CREATE TABLE [dbo].[bills](
+    [bill_no] [int] NOT NULL identity(1,1),
+    [bill_insurance_no] [int] NOT NULL,
+    [bill_patient_id] [int] NOT NULL,
+    [bill_report_id] [int] NOT NULL,
+    [bill_doc_charge] [decimal] NOT NULL,
+    [bill_medicine_charge] [decimal] NOT NULL,
+    [bill_room_charge] [decimal] NOT NULL,
+    [bill_operation_charge] [decimal] NOT NULL,
+    [bill_no_of_days] [int] NOT NULL,
+    [bill_total_charge] [decimal] default 0,
+    CONSTRAINT [PK_bill_no] PRIMARY KEY ([bill_no]),
+    CONSTRAINT [FK_bill_patient_id] FOREIGN KEY ([bill_patient_id]) REFERENCES patient_info([patient_info_id]),
+    CONSTRAINT [FK_bill_insurance_no] FOREIGN KEY ([bill_insurance_no]) REFERENCES insurance([insurance_no]),
+    CONSTRAINT [FK_bill_report_id] FOREIGN KEY ([bill_report_id]) REFERENCES reports([report_id])
+)
+
+select * from patients
+INSERT into patients (patient_id,patient_fname,patient_lname,patient_gender,patient_streetname,patient_city,patient_state,patient_zip,patient_email,patient_phone)
+values(101,'Virat','Kohli','Male','203 Cherry st','Syracuse','NY',13210,'Kohli123@gmail.com','3151234098'),
+(102,'Sisira','Pathakamuri','Female','205 Apple st','Argentina','CA',17350,'sisira987@gmail.com','4694908517'),
+(103,'Mahitha','Karuturi','Female','213 Grape st','Boston','PS',18710,'mahik@gmail.com','3167890098'),
+(104,'Mahitha','CH','Female','111 Mango st','Chicago','NY',76123,'mahich@gmail.com','3151212345'),
+(105,'Anvitha','KS','Female','608 Strawberry st','Fargo','TX',00710,'anviks@gmail.com','3234564098'),
+(106,'Sravan','Kumar','Male','220 Kiwi st','Erie','MD',12345,'sravank@gmail.com','3456734098')
+
+
+select * from patient_info
+
+INSERT into patient_info (patient_info_id,patient_info_height,patient_indo_dob,patient_info_weight,patient_info_bloodtype,patient_info_bp,patient_info_temp)
+values(101,5.6,'2000-11-12',66.5,'A+','140/20',99.2),
+(102,5.60,'2000-11-12',66.5,'A+','180/90',99.2),
+(103,5.10,'1999-07-23',70.5,'B+','145/25',99.8),
+(104,4.50,'1998-05-17',89.5,'B-','182/79',101.2),
+(105,6.10,'1999-08-07',54.5,'A-','160/70',103.2),
+(106,5.90,'1996-01-01',75.5,'A+','140/20',98.2)
+
+select * from departments
+
+INSERT into departments (department_id,department_name)
+values(001,'Neurology'),
+(002,'Nephrology'),
+(003,'Dermatology'),
+(004,'Cardiology')
+
+select * from employees
+
+INSERT into employees (employees_id,employees_fname,employees_lname,employees_gender,employees_dob,employees_country_origin,employees_streetname,employees_city,employees_state,employees_zip,employees_email,employees_phone,employees_department_id)
+values(201,'Sarah','Bailey','Female','1997-07-23','Brazil','203 Cherry st','Syracuse','NY',13210,'Kohli123@gmail.com','3151212345','003'),
+(202,'Meredith','Grey','Female','1986-08-22','India','320 Kennsington st','Dallas','MS',12345,'merbear@gmail.com','315121987','003'),
+(203,'Christina','Yang','Female','1997-02-12','Pakistan','430 Hawthorne st','San Jose','MD',34567,'mcdreamy@gmail.com','3151554098','002'),
+(204,'Jackson','Avery','Male','1997-11-13','Sri Lanka','233 Clarenton st','Santa Barbara','OH',87654,'mchottie@gmail.com','4563234098','004'),
+(205,'Beea','Mory','Female','1997-07-15','Afganistan','203 Euclid st','Sandiego','CA',98765,'gorgeous@gmail.com','3122224098','001')
+
+
+
+
+select * from doctors
+
+INSERT into doctors (doctor_id,doctor_fname,doctor_lname,doctor_email,doctor_specialization)
+values(111,'Dheeraj','Parsa','dparsa3@gmail.com','Cardiology'),
+(112,'Mrunalini','Ramnath','rmruna@gmail.com','Cardiology'),
+(113,'Jaiesh','Reddy','jaieshreddy@gmail.com','Neurology'),
+(114,'Arjun','Reddy','arjun123@gmail.com','Neurology'),
+(115,'Sahithi','Katakam','sahikat@gmail.com','Neurology'),
+(116,'Namratha','Addala','namuadd@gmail.com','Nephrology')
+
+
+select * from appointments
+
+INSERT into appointments(appointment_id,appointment_patient_id,appointment_doctor_id,appointment_created_date,appointment_date,appointment_time,appointment_desc)
+values(311,101,111,'2022-12-02','2022-12-04','14:30','sxrdctfvygbuhklmed5rfuhinjmokedtybguhinj'),
+(312,101,112,'2022-12-02','2022-12-04','16:30','sxrdctfvygbuhklmed5rfuhinjmokedtybguhinj'),
+(313,102,116,'2022-12-02','2022-12-04','19:30','ws4ed5rf6guinjokmde5rf6t7gyhiunsedrtf'),
+(314,103,116,'2022-12-03','2022-12-04','18:00','fwuyegcwieciuerwhceiurhciur3ehcjowije'),
+(315,104,115,'2022-12-03','2022-12-05','10:20','bnbsyuwihddhcdhbrieveirhvei'),
+(316,105,114,'2022-12-05','2022-12-07','11:30','hwbfierhgfiruyhfgiurhfgirtuhgiurthg'),
+(317,106,111,'2022-12-06','2022-12-07','08:30','hhshdfdgfgfgggguwegfueyfuyefuyvfuyhvifuyhvrf'),
+(318,103,114,'2022-12-06','2022-12-07','09:00','hcbejhbvueryvuyergveruyvbuyfvhefiuyhvbehbvieuyr'),
+(319,103,113,'2022-12-06','2022-12-08','15:00','hfbrehjrfbuyrhgfiueyrhfiuerhiurehv'),
+(320,106,113,'2022-12-07','2022-12-08','13:30','hceydguerygfvueyrgvfuerygv'),
+(321,106,111,'2022-12-07','2022-12-09','12:30','jhfergfuyerfgeruygfyrgvcuye')
+
+
+select * from lab_tests
+INSERT into lab_tests (lab_test_id,lab_test_type,lab_test_date,lab_test_price,lab_patient_id,lab_appointment_id)
+values(411,'Xray','2022-12-04',325,101,311),
+(412,'Xray','2022-12-05',325,102,313),
+(413,'CtScan','2022-12-05',325,103,314),
+(414,'BloodWork','2022-12-05',325,104,315),
+(415,'Biopsy','2022-12-08',325,105,316),
+(416,'Xray','2022-12-02',325,106,317),
+(417,'Xray','2022-12-02',325,103,319),
+(418,'Xray','2022-12-02',200,106,320)
+
+select * from medicines
+INSERT into medicines(medicine_id,medicine_name,medicine_type,medicine_cost,medicine_desc)
+values(501,'combiflam','painkiller',20,'ncisdhciebdsciehbcw'),
+(502,'citrizen','allergen',20,'bscjabcahsbca'),
+(503,'oflox','antibiotic',23,'bnsjvhweriuhvwihiw'),
+(504,'domstol','antibiotic',25,'uuutfdfsdiuehc'),
+(505,'eno','painkiller',26,'iksiqwudhiquhiwueh')
+
+INSERT into reports(report_patient_id,report_doctor_id,report_lab_test_id,report_diagnosis,report_prescribed_medicine_id)
+values(101,111,411,'dtdtfgfbbbbbbbbbbbbbfdj',501),
+(102,112,412,'fggjghjkjhkhuiuyu',502),
+(103,113,413,'jhgjygkhkuhkuh',503),
+(104,114,414,'gfcyrtfjhgnvgjhg',504),
+(105,115,415,'bgfjhngbghgbhmb',505)
+select*from reports
+select * from insurance
+INSERT into insurance(insurance_no,insurance_patient_id,insurance_type,insurance_publish_date,insurance_expiry_date)
+values (61101,101,'TYPEA','2022-06-15','2022-10-21'),
+     (61102,102,'STUDENT','2022-06-05','2022-10-11'),
+(61103,103,'TYPEB','2022-12-04','2022-12-31'),
+(61104,104,'STUDENT','2022-06-05','2022-10-31'),
+(61105,105,'TYPEC','2022-07-01','2023-06-25')
+select*from bills
+INSERT into bills(bill_insurance_no,bill_patient_id,bill_report_id,bill_doc_charge,bill_medicine_charge,bill_room_charge,bill_operation_charge,bill_no_of_days)
+values (61101,101,1,500,800,800,900,8),
+     (61102,102,2,450,890,455,889,4),
+     (61103,103,3,909,996,898,888,5),
+     (61104,104,4,687,889,97374,74747,3),
+     (61105,105,5,9988,75895,95857,4344,10)
+
+
+-- This is created to calculate the total bill charge
+create procedure update_bill_total_charge
+	as
+	begin
+	update bills set bill_total_charge = bill_doc_charge+bill_medicine_charge+bill_room_charge+bill_operation_charge
+	end
+
+	exec update_bill_total_charge
+
